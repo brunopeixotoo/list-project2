@@ -3,10 +3,12 @@ let inputElement = document.querySelector("#shop input");//Fazendo relação com
 let buttonElement = document.querySelector("#shop button");
 let listElement = document.querySelector("#shop ul");
 let inputBuscador = document.querySelector("#buscador input");
-let h4Buscador = document.querySelector("#buscador h4");
+let divBuscador = document.querySelector("#buscador div");
+let buttonBuscador = document.querySelector("#buscador button");
 
 
-let LISTA_DE_COMPRAS = [];
+
+let LISTA_DE_COMPRAS = JSON.parse(localStorage.getItem("@cestaCompras")) || [];
 
 function adicionarCompras() { //Function para adição de compras
     if (inputElement.value === '') {
@@ -16,7 +18,9 @@ function adicionarCompras() { //Function para adição de compras
         let compras = inputElement.value;//Valor digitado no input do index
         LISTA_DE_COMPRAS.push(compras);//Adicionando na array
         inputElement.value = ''//limpando campo do input
+
         colocarNoIndex();
+        salvarDados();
     }
     
 }
@@ -33,7 +37,7 @@ function colocarNoIndex() {//Essa function vai colocar os valores no index.html
         let textElement = document.createTextNode(compra);//Criando o texto do item da lista
         let buttonExcluir = document.createElement('a');//Criando <a>
         buttonExcluir.setAttribute('href', '#');
-
+      
         let textButton = document.createTextNode('Excluir');//Criando texto do button e colocando dentro da tag <a>
         buttonExcluir.appendChild(textButton);
 
@@ -44,29 +48,53 @@ function colocarNoIndex() {//Essa function vai colocar os valores no index.html
         liElement.appendChild(textElement);//Adicionando na <li>
         liElement.appendChild(buttonExcluir);//Adiconando <a>
 
-        
-
     })
 }
 
 function excluir(compra) { //Function para caso o usuário aperte o botão 'excluir'
     LISTA_DE_COMPRAS.splice(compra, 1);
     colocarNoIndex();//Expondo nova lista, sem os itens exluídos.
-    pesquisaProduto();
+    salvarDados();//Salvando
+}
+
+function salvarDados() {//Salvando no LocalStorage
+    localStorage.setItem("@cestaCompras", JSON.stringify(LISTA_DE_COMPRAS));
 }
 
 function pesquisaProduto() {//Function para pesquisa de produtos da lista
 
-    if (inputBuscador === '') {
-        alert("Você precisa digitar um item")
+    if (inputBuscador.value === '') {//Verificadno o valor do input
+        alert("Você precisa digitar um item");
         return false;
     } else {
-        let filter = LISTA_DE_COMPRAS.filter((item) => {
-        
-            if (item.lenght === inputBuscador.value) {
-                
+        let encontrado = false;
+       
+        let filtro = LISTA_DE_COMPRAS.forEach((item) => {//Percorrendo a lista(item por item)
+            if (item === inputBuscador.value) {
+                encontrado = true;
+
+                let paragrafElement = document.createElement('p');//Criando elementos html
+                let itemList = document.createTextNode(`O produto ${inputBuscador.value} foi encontrado na sua cesta!`);
+
+                paragrafElement.appendChild(itemList);//Adionando text no <p>
+                divBuscador.appendChild(paragrafElement);//Adionando na <div>
+
+                inputBuscador.value = '';
+               
             }
         })
+        if (!encontrado){
+
+                let paragrafElement = document.createElement('p');//Criando elementos html
+                let itemList = document.createTextNode(`Não foi encontrado o produto: ${inputBuscador.value}`);
+
+                paragrafElement.appendChild(itemList);//Adionando text no <p>
+                divBuscador.appendChild(paragrafElement);//Adionando na <div>
+
+                inputBuscador.value = '';
+        }
     }
-    
 }
+ 
+buttonBuscador.onclick = pesquisaProduto;//Ativando Button do buscador
+
